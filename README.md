@@ -4,6 +4,8 @@ cnpm install --save node-uuid
 cnpm install vue-localstorage --save
 cnpm i imports-loader exports-loader --save-dev
 cnpm i three --save-dev
+cnpm install three-orbitcontrols
+
 性能监视器Stats
 cnpm install stats.js
 动画引擎Tween.js

@@ -18,13 +18,13 @@ function createWindow() {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 1080,
+    height: 720,
     useContentSize: true,
-    width: 1920,
-    fullscreen: true,
-    frame: false,//添加后自定义标题//自定义边框
-    resizable: false,//可否缩放
-    movable: false//可否移动
+    width: 1080,
+    fullscreen: false,
+    frame: true,//添加后自定义标题//自定义边框
+    resizable: true,//可否缩放
+    movable: true//可否移动
     // webPreferences: {webSecurity: false}
   })
 

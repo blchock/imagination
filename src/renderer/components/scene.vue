@@ -12,6 +12,7 @@
 <script>
 import Menu from "./menu.vue";
 import { Loading } from "element-ui";
+import "three-orbitcontrols";
 export default {
   name: "Scene",
   data() {
@@ -26,7 +27,9 @@ export default {
       stats: null,
       size: null,
       objs: [],
-      loading: null
+      loading: null,
+      oc: null,
+      clock: null
     };
   },
   methods: {
@@ -41,6 +44,21 @@ export default {
         this.stats = new this.$stats();
         container.appendChild(this.stats.domElement);
       }
+      this.clock = new this.$three.Clock();
+    },
+    render() {
+      this.renderer.render(this.scene, this.camera);
+    },
+    onWindowResize() {
+      //窗口变动触发的函数
+      let container = this.$refs.canvas;
+      this.size = { w: container.clientWidth, h: container.clientHeight };
+      this.camera.aspect = this.size.w / this.size.h;
+      // this.camera.aspect = window.innerWidth / window.innerHeight;
+      this.camera.updateProjectionMatrix();
+      this.render();
+      this.renderer.setSize(this.size.w, this.size.h);
+      // this.renderer.setSize(window.innerWidth, window.innerHeight);
     },
     initCamera() {
       this.camera = new this.$three.PerspectiveCamera(
@@ -52,6 +70,7 @@ export default {
       this.camera.position.set(100, 300, 600);
       this.camera.up.set(0, 1, 0);
       this.camera.lookAt(new this.$three.Vector3(0, 0, 0));
+      window.onresize = this.onWindowResize;
     },
     initScene() {
       this.scene = new this.$three.Scene();
@@ -126,7 +145,9 @@ export default {
       //   // this.mesh.rotation.x += 0.01;
       //   this.mesh.rotation.y += 0.015;
       // }
-      this.renderer.render(this.scene, this.camera);
+      let delta = this.clock.getDelta();
+      this.oc.update(delta);
+      this.render();
       if (this.showFPS) this.stats.update();
       this.$tween.update();
       requestAnimationFrame(this.animation);
@@ -173,6 +194,44 @@ export default {
         self.Com.pickObject = undefined;
         // console.log("clear pick");
       }
+    },
+    initOperation() {
+      this.$refs.canvas.addEventListener("mousedown", this.ray);
+      let controls = new this.$three.OrbitControls(
+        this.camera,
+        this.$refs.canvas
+        // this.renderer.domElement
+      );
+      // 如果使用animate方法时，将此函数删除
+      //controls.addEventListener( 'change', render );
+      // 使动画循环使用时阻尼或自转 意思是否有惯性
+      controls.target = new this.$three.Vector3(0, 0, 0);
+      // controls.enabled = true
+      // controls.enableKeys = true;
+      controls.enableDamping = true;
+      // //动态阻尼系数 就是鼠标拖拽旋转灵敏度
+      controls.dampingFactor = 0.25;
+      //是否自动旋转
+      controls.autoRotate = false;
+      controls.autoRotateSpeed = 1.0;
+      controls.keys = {
+        LEFT: 65, //left arrow
+        UP: 87, // up arrow
+        RIGHT: 68, // right arrow
+        BOTTOM: 83 // down arrow
+      };
+      controls.mouseButtons = {
+        LEFT: this.$three.MOUSE.ROTATE,
+        MIDDLE: this.$three.MOUSE.DOLLY,
+        RIGHT: this.$three.MOUSE.PAN
+      };
+      // //设置相机距离原点的最近距离
+      // controls.minDistance = 200;
+      // //设置相机距离原点的最远距离
+      // controls.maxDistance = 600;
+      // //是否开启右键拖拽
+      controls.enablePan = true;
+      this.oc = controls;
     }
   },
   mounted() {
@@ -182,8 +241,8 @@ export default {
     this.initScene();
     this.initLight();
     if (this.showHelper) this.initGrid();
+    this.initOperation();
     this.animation();
-    window.addEventListener("mousedown", this.ray);
   },
   components: {
     Menu
