@@ -2,7 +2,7 @@ import Vue from 'vue';
 import * as THREE from 'three';
 Vue.prototype.$three = THREE
 //性能监视器Stats
-import * as Stats from 'Stats';
+import * as Stats from 'stats.js';
 Vue.prototype.$stats = Stats
 //动画引擎Tween.js
 import TWEEN from "@tweenjs/tween.js";
