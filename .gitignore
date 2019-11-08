@@ -10,4 +10,5 @@ npm-debug.log.*
 thumbs.db
 static/*
 !static/system
+!static/res
 !.gitkeep

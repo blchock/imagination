@@ -23,7 +23,7 @@ export default {
     return {
       showFPS: true,
       showUI: true,
-      showHelper: true,
+      showHelper: false,
       camera: null,
       scene: null,
       renderer: null,
@@ -66,31 +66,69 @@ export default {
     },
     initCamera() {
       this.camera = new THREE.PerspectiveCamera(
-        45,
+        35,
         this.size.w / this.size.h,
         1,
         10000
       );
-      this.camera.position.set(100, 300, 600);
+      this.camera.position.set(50, 100, 200);
       this.camera.up.set(0, 1, 0);
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
       window.onresize = this.onWindowResize;
     },
     initScene() {
-      let scene = new Physijs.Scene;
+      let scene = new Physijs.Scene();
       scene.setGravity(new THREE.Vector3(0, -50, 0));
+      scene.addEventListener("update", function() {
+        scene.simulate(undefined, 2);
+      });
+      // Loader
+      let loader = new THREE.TextureLoader();
+      // Materials
+      let ground_material = Physijs.createMaterial(
+        new THREE.MeshLambertMaterial({
+          map: loader.load("static/res/rocks.jpg")
+        }),
+        0.8, // high friction
+        0.4 // low restitution
+      );
+      ground_material.map.wrapS = ground_material.map.wrapT =
+        THREE.RepeatWrapping;
+      ground_material.map.repeat.set(3, 3);
+      // Ground
+      let ground = new Physijs.BoxMesh(
+        new THREE.BoxGeometry(1024, 1, 1024),
+        ground_material,
+        0 // mass
+      );
+      ground.receiveShadow = true;
+      scene.add(ground);
       this.scene = scene;
       // this.scene = new THREE.Scene();
     },
     initLight() {
-      // 环境光
-      var light = new THREE.AmbientLight(0xffffff);
-      light.position.set(100, 100, 200);
+      let light = new THREE.DirectionalLight(0xffffff);
+      light.position.set(20, 40, -15);
+      light.target.position.copy(this.scene.position);
+      light.castShadow = true;
+      light.shadowCameraLeft = -60;
+      light.shadowCameraTop = -60;
+      light.shadowCameraRight = 60;
+      light.shadowCameraBottom = 60;
+      light.shadowCameraNear = 20;
+      light.shadowCameraFar = 200;
+      light.shadowBias = -0.0001;
+      light.shadowMapWidth = light.shadowMapHeight = 2048;
+      light.shadowDarkness = 0.7;
       this.scene.add(light);
-      // 方向光/平行光/太阳光
-      var light2 = new THREE.DirectionalLight(0xf5e56b, 1);
-      light2.position.set(100, 1000, 600);
-      this.scene.add(light2);
+      // 环境光
+      var lightEnv = new THREE.AmbientLight(0xffffff, 0.2);
+      lightEnv.position.set(100, 100, 200);
+      this.scene.add(lightEnv);
+      // // 方向光/平行光/太阳光
+      // var light2 = new THREE.DirectionalLight(0xf5e56b, 0.3);
+      // light2.position.set(100, 1000, 600);
+      // this.scene.add(light2);
     },
     showLoading(isShow) {
       if (isShow) {
@@ -106,6 +144,25 @@ export default {
         }
       }
     },
+    initObject(model) {
+      let data = model.parser.json
+      for (let x in data.materials) {
+        let material = Physijs.createMaterial(data.materials[x], 1, 0);
+        let mesh = new Physijs.BoxMesh(data.meshes[x], material, 0);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        scene.add(mesh);
+      }
+      return mesh;
+      // obj.addEventListener("collision", function(
+      //   other_object,
+      //   relative_velocity,
+      //   relative_rotation,
+      //   contact_normal
+      // ) {
+      //   // this是当前监听的模型，other_object是与之碰撞的对象，relative_velocity是两个模型之间的速度力差，relative_rotation是两个模型旋转之间的差
+      // });
+    },
     loadObject(path, func) {
       let self = this;
       if (self.loading) return;
@@ -113,7 +170,7 @@ export default {
       loader.load(
         path,
         function(gltf) {
-          let obj = gltf.scene;
+          let obj = gltf.scene; //self.initObject(gltf);
           self.objs.push(obj);
           self.scene.add(obj);
           if (func) func(obj);
@@ -245,8 +302,8 @@ export default {
     // 加载物理引擎
     window.THREE = THREE;
     require("@/libs/physi.js");
-    Physijs.scripts.worker = 'static/system/physijs_worker.js';
-    Physijs.scripts.ammo = 'ammo.js';
+    Physijs.scripts.worker = "static/system/physijs_worker.js";
+    Physijs.scripts.ammo = "ammo.js";
     //
     this.objs = [];
     this.initThree();
