@@ -34,7 +34,8 @@ export default {
   -khtml-user-select: none; /*早期浏览器*/
   user-select: none;
 }
-ul,li{
+ul,
+li {
   list-style: none;
   padding: 0;
   margin: 0;

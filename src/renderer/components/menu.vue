@@ -84,7 +84,7 @@ export default {
           );
         let toolPath = path.join(
           self.Com.rootPath,
-          "static/FBX2glTF-windows-x64.exe"
+          "static/system/FBX2glTF-windows-x64.exe"
         );
         let name = path.basename(file, ".fbx");
         let outDir = `static/${name}_out/${name}.gltf`;

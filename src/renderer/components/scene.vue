@@ -10,6 +10,10 @@
 
 
 <script>
+import * as THREE from "three";
+import * as Stats from "Stats";
+import TWEEN from "@tweenjs/tween.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import Menu from "./menu.vue";
 import { Loading } from "element-ui";
 import "three-orbitcontrols";
@@ -36,15 +40,15 @@ export default {
     initThree() {
       let container = this.$refs.canvas;
       this.size = { w: container.clientWidth, h: container.clientHeight };
-      this.renderer = new this.$three.WebGLRenderer({ antialias: true });
+      this.renderer = new THREE.WebGLRenderer({ antialias: true });
       this.renderer.setSize(this.size.w, this.size.h);
       container.appendChild(this.renderer.domElement);
       this.renderer.setClearColor(0xffffff, 1.0);
       if (this.showFPS) {
-        this.stats = new this.$stats();
+        this.stats = new Stats();
         container.appendChild(this.stats.domElement);
       }
-      this.clock = new this.$three.Clock();
+      this.clock = new THREE.Clock();
     },
     render() {
       this.renderer.render(this.scene, this.camera);
@@ -61,7 +65,7 @@ export default {
       // this.renderer.setSize(window.innerWidth, window.innerHeight);
     },
     initCamera() {
-      this.camera = new this.$three.PerspectiveCamera(
+      this.camera = new THREE.PerspectiveCamera(
         45,
         this.size.w / this.size.h,
         1,
@@ -69,19 +73,22 @@ export default {
       );
       this.camera.position.set(100, 300, 600);
       this.camera.up.set(0, 1, 0);
-      this.camera.lookAt(new this.$three.Vector3(0, 0, 0));
+      this.camera.lookAt(new THREE.Vector3(0, 0, 0));
       window.onresize = this.onWindowResize;
     },
     initScene() {
-      this.scene = new this.$three.Scene();
+      let scene = new Physijs.Scene;
+      scene.setGravity(new THREE.Vector3(0, -50, 0));
+      this.scene = scene;
+      // this.scene = new THREE.Scene();
     },
     initLight() {
       // 环境光
-      var light = new this.$three.AmbientLight(0xffffff);
+      var light = new THREE.AmbientLight(0xffffff);
       light.position.set(100, 100, 200);
       this.scene.add(light);
       // 方向光/平行光/太阳光
-      var light2 = new this.$three.DirectionalLight(0xf5e56b, 1);
+      var light2 = new THREE.DirectionalLight(0xf5e56b, 1);
       light2.position.set(100, 1000, 600);
       this.scene.add(light2);
     },
@@ -102,7 +109,7 @@ export default {
     loadObject(path, func) {
       let self = this;
       if (self.loading) return;
-      var loader = new this.$gltf();
+      var loader = new GLTFLoader();
       loader.load(
         path,
         function(gltf) {
@@ -136,7 +143,7 @@ export default {
     },
     initGrid() {
       // 绘制网格 边长是1000，每个小网格的边长是50
-      var helper = new this.$three.GridHelper(2000, 100, 0x000000, 0x808080);
+      var helper = new THREE.GridHelper(2000, 100, 0x000000, 0x808080);
       this.scene.add(helper);
     },
     animation: function() {
@@ -149,7 +156,7 @@ export default {
       this.oc.update(delta);
       this.render();
       if (this.showFPS) this.stats.update();
-      this.$tween.update();
+      TWEEN.update();
       requestAnimationFrame(this.animation);
     },
     getPickedObject(obj) {
@@ -173,8 +180,8 @@ export default {
       let self = this;
       if (event.button === 0) {
         // console.log("win:",this.size)
-        var mouse = new self.$three.Vector2();
-        var raycaster = new self.$three.Raycaster();
+        var mouse = new THREE.Vector2();
+        var raycaster = new THREE.Raycaster();
         //将鼠标点击位置的屏幕坐标转成threejs中的标准坐标,具体解释见代码释义
         mouse.x = (event.clientX / this.size.w) * 2 - 1;
         mouse.y = -(event.clientY / this.size.h) * 2 + 1;
@@ -197,7 +204,7 @@ export default {
     },
     initOperation() {
       this.$refs.canvas.addEventListener("mousedown", this.ray);
-      let controls = new this.$three.OrbitControls(
+      let controls = new THREE.OrbitControls(
         this.camera,
         this.$refs.canvas
         // this.renderer.domElement
@@ -205,7 +212,7 @@ export default {
       // 如果使用animate方法时，将此函数删除
       //controls.addEventListener( 'change', render );
       // 使动画循环使用时阻尼或自转 意思是否有惯性
-      controls.target = new this.$three.Vector3(0, 0, 0);
+      controls.target = new THREE.Vector3(0, 0, 0);
       // controls.enabled = true
       // controls.enableKeys = true;
       controls.enableDamping = true;
@@ -221,9 +228,9 @@ export default {
         BOTTOM: 83 // down arrow
       };
       controls.mouseButtons = {
-        LEFT: this.$three.MOUSE.ROTATE,
-        MIDDLE: this.$three.MOUSE.DOLLY,
-        RIGHT: this.$three.MOUSE.PAN
+        LEFT: THREE.MOUSE.ROTATE,
+        MIDDLE: THREE.MOUSE.DOLLY,
+        RIGHT: THREE.MOUSE.PAN
       };
       // //设置相机距离原点的最近距离
       // controls.minDistance = 200;
@@ -235,6 +242,12 @@ export default {
     }
   },
   mounted() {
+    // 加载物理引擎
+    window.THREE = THREE;
+    require("@/libs/physi.js");
+    Physijs.scripts.worker = 'static/system/physijs_worker.js';
+    Physijs.scripts.ammo = 'ammo.js';
+    //
     this.objs = [];
     this.initThree();
     this.initCamera();
