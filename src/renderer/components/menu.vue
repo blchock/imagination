@@ -72,18 +72,10 @@ export default {
         properties: ["openFile"]
       }); //可默认打开文件
       if (ret && ret.length === 1) {
-        self.$emit("loading", true);
+        sc.showLoading(true)
         let file = ret[0];
-        self.Com.rootPath =
-          self.Com.rootPath ||
-          path.normalize(
-            process.execPath.slice(
-              0,
-              process.execPath.lastIndexOf("node_modules")
-            )
-          );
         let toolPath = path.join(
-          self.Com.rootPath,
+          sc.rootPath,
           "static/system/FBX2glTF-windows-x64.exe"
         );
         let name = path.basename(file, ".fbx");
@@ -95,19 +87,19 @@ export default {
                 title: "失败",
                 message: "转换fbx文件失败！"
               });
-              self.$emit("loading", false);
+              sc.showLoading(false)
               return;
             }
-            self.$emit("loadObj", outDir, obj => {
+            sc.Bodym.create(outDir, obj => {
               // obj.position.set(0, 10, 0);
               // obj.scale.set(30, 30, 30);
             });
           });
         } else {
           let outDir = path
-            .relative(self.Com.rootPath, file)
+            .relative(sc.rootPath, file)
             .replace(/\\/g, "/");
-          self.$emit("loadObj", outDir, obj => {
+          sc.Bodym.create(outDir, obj => {
             obj.position.set(0, 0, 0);
             // obj.scale.set(30, 30, 30);
           });
@@ -116,7 +108,7 @@ export default {
     },
     onDeleteBtn() {
       let self = this;
-      if (self.Com.pickObject) {
+      if (sc.pickObject) {
         self
           .$confirm("此操作将永久删除该角色, 是否继续?", "提示", {
             confirmButtonText: "确定",
@@ -124,8 +116,8 @@ export default {
             type: "warning"
           })
           .then(() => {
-            console.log(self.Com.pickObject.uuid,self.Com.pickObject)
-            self.$emit("delObj", self.Com.pickObject.uuid);
+            console.log(sc.pickObject.uuid,sc.pickObject)
+            sc.Bodym.remove(sc.pickObject.uuid);
           });
       } else {
         self.$message({
