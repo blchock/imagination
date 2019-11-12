@@ -99,8 +99,8 @@ export default {
               return;
             }
             self.$emit("loadObj", outDir, obj => {
-              obj.position.set(0, 10, 0);
-              obj.scale.set(30, 30, 30);
+              // obj.position.set(0, 10, 0);
+              // obj.scale.set(30, 30, 30);
             });
           });
         } else {

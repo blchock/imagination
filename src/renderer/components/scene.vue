@@ -152,6 +152,18 @@ export default {
     //   //   // this是当前监听的模型，other_object是与之碰撞的对象，relative_velocity是两个模型之间的速度力差，relative_rotation是两个模型旋转之间的差
     //   // });
     // },
+    initPhysic(obj) {
+      //计算模型尺寸
+      var box = new THREE.Box3();
+      box.expandByObject(obj);
+      var helper = new THREE.Box3Helper( box, 0xffff00 ); // 显示网格
+      this.scene.add( helper ); // updateMatrixWorld
+      // var length = box.max.x - box.min.x;
+      // var width = box.max.z - box.min.z;
+      // var height = box.max.y - box.min.y;
+      // var box = new THREE.Box3();
+      
+    },
     loadObject(path, func) {
       let self = this;
       if (self.loading) return;
@@ -162,6 +174,7 @@ export default {
           // let obj = self.initObject(gltf.scene);
           let obj = gltf.scene;
           self.scene.add(obj);
+          self.initPhysic(obj);
           self.objs.push(obj);
           if (func) func(obj);
           self.showLoading(false);
