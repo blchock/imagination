@@ -33,7 +33,8 @@ export default {
       objs: [],
       loading: null,
       oc: null,
-      clock: null
+      clock: null,
+      world: null
     };
   },
   methods: {
@@ -66,45 +67,23 @@ export default {
     },
     initCamera() {
       this.camera = new THREE.PerspectiveCamera(
-        35,
+        70,
         this.size.w / this.size.h,
         1,
         10000
       );
-      this.camera.position.set(50, 100, 200);
+      this.camera.position.set(50, 30, 50);
       this.camera.up.set(0, 1, 0);
       this.camera.lookAt(new THREE.Vector3(0, 0, 0));
       window.onresize = this.onWindowResize;
     },
     initScene() {
-      let scene = new Physijs.Scene();
-      scene.setGravity(new THREE.Vector3(0, -50, 0));
-      scene.addEventListener("update", function() {
-        scene.simulate(undefined, 2);
-      });
-      // Loader
-      let loader = new THREE.TextureLoader();
-      // Materials
-      let ground_material = Physijs.createMaterial(
-        new THREE.MeshLambertMaterial({
-          map: loader.load("static/res/rocks.jpg")
-        }),
-        0.8, // high friction
-        0.4 // low restitution
-      );
-      ground_material.map.wrapS = ground_material.map.wrapT =
-        THREE.RepeatWrapping;
-      ground_material.map.repeat.set(3, 3);
-      // Ground
-      let ground = new Physijs.BoxMesh(
-        new THREE.BoxGeometry(1024, 1, 1024),
-        ground_material,
-        0 // mass
-      );
-      ground.receiveShadow = true;
-      scene.add(ground);
-      this.scene = scene;
-      // this.scene = new THREE.Scene();
+      this.scene = new THREE.Scene();
+      // init cannon
+      let world = new CANNON.World();
+      world.gravity.set(0, -9.82, 0);
+      world.broadphase = new CANNON.NaiveBroadphase(); // Broadphase
+      this.world = world;
     },
     initLight() {
       let light = new THREE.DirectionalLight(0xffffff);
@@ -144,25 +123,35 @@ export default {
         }
       }
     },
-    initObject(model) {
-      let data = model.parser.json
-      for (let x in data.materials) {
-        let material = Physijs.createMaterial(data.materials[x], 1, 0);
-        let mesh = new Physijs.BoxMesh(data.meshes[x], material, 0);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        scene.add(mesh);
-      }
-      return mesh;
-      // obj.addEventListener("collision", function(
-      //   other_object,
-      //   relative_velocity,
-      //   relative_rotation,
-      //   contact_normal
-      // ) {
-      //   // this是当前监听的模型，other_object是与之碰撞的对象，relative_velocity是两个模型之间的速度力差，relative_rotation是两个模型旋转之间的差
-      // });
-    },
+    // loadPhysicObject(obj, id) {
+    //   // 通过选中模型模块 查找顶层模型
+    //   let self = this;
+    //   if (obj.children.length > 0) {
+    //     for (const i in obj.children) {
+    //       self.loadPhysicObject(obj.children[i], i);
+    //     }
+    //   }
+    //   if (obj.material && obj.geometry) {
+    //     let material = Physijs.createMaterial(obj.material, 1, 0);
+    //     let mesh = new Physijs.BoxMesh(obj.geometry, material, 0);
+    //     mesh.castShadow = true;
+    //     mesh.receiveShadow = true;
+    //     self.scene.add(mesh);
+    //     obj.parent.children[id] = mesh;
+    //   }
+    // },
+    // initObject(mesh) {
+    //   this.loadPhysicObject(mesh, 0);
+    //   return mesh;
+    //   // obj.addEventListener("collision", function(
+    //   //   other_object,
+    //   //   relative_velocity,
+    //   //   relative_rotation,
+    //   //   contact_normal
+    //   // ) {
+    //   //   // this是当前监听的模型，other_object是与之碰撞的对象，relative_velocity是两个模型之间的速度力差，relative_rotation是两个模型旋转之间的差
+    //   // });
+    // },
     loadObject(path, func) {
       let self = this;
       if (self.loading) return;
@@ -170,12 +159,14 @@ export default {
       loader.load(
         path,
         function(gltf) {
-          let obj = gltf.scene; //self.initObject(gltf);
-          self.objs.push(obj);
+          // let obj = self.initObject(gltf.scene);
+          let obj = gltf.scene;
           self.scene.add(obj);
+          self.objs.push(obj);
           if (func) func(obj);
           self.showLoading(false);
           console.log("add:", obj.uuid);
+          console.log("obj:", gltf);
         },
         undefined,
         function(error) {
@@ -214,6 +205,11 @@ export default {
       this.render();
       if (this.showFPS) this.stats.update();
       TWEEN.update();
+      this.world.step(1 / 60);
+      if (this.sphere) {
+        this.sphere.position.copy(this.sphereBody.position);
+        this.sphere.quaternion.copy(this.sphereBody.quaternion);
+      }
       requestAnimationFrame(this.animation);
     },
     getPickedObject(obj) {
@@ -296,14 +292,69 @@ export default {
       // //是否开启右键拖拽
       controls.enablePan = true;
       this.oc = controls;
+    },
+    initObject() {
+      //创建球形刚体
+      var sphereShape = new CANNON.Sphere(1); // 形状
+      var sphere_cm = new CANNON.Material(); // 材质
+      var sphereBody = new CANNON.Body({
+        // 刚体
+        mass: 5, //质量
+        position: new CANNON.Vec3(0, 10, 0), // 位置
+        shape: sphereShape,
+        material: sphere_cm
+      });
+
+      this.world.add(sphereBody);
+      // 平面 Body
+      var groundShape = new CANNON.Plane(); // 形状
+      var ground_cm = new CANNON.Material(); // 材质
+      var groundBody = new CANNON.Body({
+        // 刚体
+        mass: 0, // 质量，质量为0时为静态刚体
+        shape: groundShape,
+        material: ground_cm
+      });
+      // setFromAxisAngle 旋转 X 轴 -90 度
+      groundBody.quaternion.setFromAxisAngle(
+        new CANNON.Vec3(1, 0, 0),
+        -Math.PI / 2
+      );
+
+      this.world.add(groundBody);
+      var sphere_ground = new CANNON.ContactMaterial(ground_cm, sphere_cm, {
+        //  定义两个刚体相遇后会发生什么
+        friction: 1, // 摩擦系数
+        restitution: 0.4 // 恢复系数
+      });
+      this.world.addContactMaterial(sphere_ground); // 添加到世界中
+
+      // 平面网格
+      var groundGeometry = new THREE.PlaneGeometry(1000, 1000, 32);
+      var groundMaterial = new THREE.MeshStandardMaterial({
+        color: 0x7f7f7f,
+        side: THREE.DoubleSide //这个属性只知道是两面，具体的不清楚，哪位知道可以留言告知，谢谢
+      });
+      var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+      ground.rotation.x = -Math.PI / 2; // 跟随 前面的物理平面角度
+      this.scene.add(ground);
+
+      // 球网格
+      var sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+      var sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+      var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+      this.scene.add(sphere);
+      this.sphereBody = sphereBody;
+      this.sphere = sphere;
     }
   },
   mounted() {
     // 加载物理引擎
     window.THREE = THREE;
-    require("@/libs/physi.js");
-    Physijs.scripts.worker = "static/system/physijs_worker.js";
-    Physijs.scripts.ammo = "ammo.js";
+    window.CANNON = require("cannon");
+    // require("@/libs/physi.js");
+    // Physijs.scripts.worker = "static/system/physijs_worker.js";
+    // Physijs.scripts.ammo = "ammo.js";
     //
     this.objs = [];
     this.initThree();
@@ -313,6 +364,7 @@ export default {
     if (this.showHelper) this.initGrid();
     this.initOperation();
     this.animation();
+    this.initObject();
   },
   components: {
     Menu

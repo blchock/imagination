@@ -7702,7 +7702,7 @@ package-json@^6.3.0:
     registry-url "^5.0.0"
     semver "^6.2.0"
 
-pako@~1.0.5:
+pako@^1.0.6, pako@~1.0.5:
   version "1.0.10"
   resolved "https://registry.npm.taobao.org/pako/download/pako-1.0.10.tgz#4328badb5086a426aa90f541977d4955da5c9732"
   integrity sha1-Qyi621CGpCaqkPVBl31JVdpclzI=
@@ -9923,6 +9923,14 @@ test-exclude@^4.2.1:
     read-pkg-up "^1.0.1"
     require-main-filename "^1.0.1"
 
+three-fbx-loader@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.npm.taobao.org/three-fbx-loader/download/three-fbx-loader-1.0.3.tgz#7993429043cdc32f11882a9fefc9bee2f2d6d222"
+  integrity sha1-eZNCkEPNwy8RiCqf78m+4vLW0iI=
+  dependencies:
+    pako "^1.0.6"
+    three "^0.89.0"
+
 three-gltf-loader@^1.109.0:
   version "1.109.0"
   resolved "https://registry.npm.taobao.org/three-gltf-loader/download/three-gltf-loader-1.109.0.tgz#64ebaa0d14704431c7b5f0be0938ad346a618d70"
@@ -9932,6 +9940,11 @@ three@^0.110.0:
   version "0.110.0"
   resolved "https://registry.npm.taobao.org/three/download/three-0.110.0.tgz#8719591de1336269113ee79f4268ba247b2324f8"
   integrity sha1-hxlZHeEzYmkRPuefQmi6JHsjJPg=
+
+three@^0.89.0:
+  version "0.89.0"
+  resolved "https://registry.npm.taobao.org/three/download/three-0.89.0.tgz#4442d819a6168871b8d2cb37ad12a24310c170f5"
+  integrity sha1-RELYGaYWiHG40ss3rRKiQxDBcPU=
 
 throttle-debounce@^1.0.1:
   version "1.1.0"
