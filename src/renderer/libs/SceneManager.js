@@ -22,7 +22,6 @@ class SceneManager { //  extends Base
     this.view = view;
     this.name = name;
     this.showFPS = showFPS
-    this.showHelper = showHelper
     this.camera = null
     this.scene = null
     this.renderer = null
@@ -39,7 +38,7 @@ class SceneManager { //  extends Base
     this.initScene();
     this.initLight();
     this.Bodym = new BodyManager();
-    if (this.showHelper) this.initGrid();
+    this.initGrid(showHelper);
     this.initOperation();
     this.initPhysic();
     this.animation();
@@ -105,10 +104,12 @@ class SceneManager { //  extends Base
     lightEnv.position.set(100, 100, 200);
     this.scene.add(lightEnv);
   }
-  initGrid() {
-    // 绘制网格 边长是1000，每个小网格的边长是50
+  initGrid(showHelper) {
+    // 绘制网格 边长是2000，每个小网格的边长是100
     var helper = new THREE.GridHelper(2000, 100, 0x000000, 0x808080);
     this.scene.add(helper);
+    helper.visible = showHelper;
+    this.helper = helper;
   }
   animation() {
     let delta = sc.clock.getDelta();
@@ -117,10 +118,8 @@ class SceneManager { //  extends Base
     if (sc.showFPS) sc.stats.update();
     TWEEN.update();
     sc.world.step(1 / 60);
-    if (sc.sphere) {
-      sc.sphere.position.copy(sc.sphereBody.position);
-      sc.sphere.quaternion.copy(sc.sphereBody.quaternion);
-    }
+    let bodys = sc.Bodym.getBodys()
+    for (const i in bodys) bodys[i].linkage();
     requestAnimationFrame(sc.animation);
   }
   showLoading(isShow) {
@@ -156,8 +155,13 @@ class SceneManager { //  extends Base
       var intersects = raycaster.intersectObjects(self.Bodym.getEntitys(), true);
       // console.log("intersects:",intersects)
       if (intersects.length > 0) {
-        sc.pickObject = self.Bodym.getParent(intersects[0].object);
-        console.log("pick:", sc.pickObject.id);
+        let picked = self.Bodym.getParent(intersects[0].object);
+        if(picked) {
+          sc.pickObject = picked;
+          console.log("pick:", sc.pickObject.id);
+        } else {
+          console.log("ERROR! you picked a unknow body:",intersects[0]);
+        }
       }
     } else if (event.button === 2) {
       sc.pickObject = undefined;
@@ -207,19 +211,20 @@ class SceneManager { //  extends Base
     var sphereShape = new CANNON.Sphere(1); // 形状
     var sphere_cm = new CANNON.Material(); // 材质
     var sphereBody = new CANNON.Body({
-      // 刚体
       mass: 5, //质量
       position: new CANNON.Vec3(0, 10, 0), // 位置
       shape: sphereShape,
       material: sphere_cm
     });
-
-    this.world.add(sphereBody);
-    // 平面 Body
+    // 球网格
+    var sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+    var sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+    var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    let ball = this.Bodym.create("shape",{entity:sphere,soul:sphereBody,material:sphere_cm});
+    // 平面
     var groundShape = new CANNON.Plane(); // 形状
     var ground_cm = new CANNON.Material(); // 材质
     var groundBody = new CANNON.Body({
-      // 刚体
       mass: 0, // 质量，质量为0时为静态刚体
       shape: groundShape,
       material: ground_cm
@@ -229,32 +234,19 @@ class SceneManager { //  extends Base
       new CANNON.Vec3(1, 0, 0),
       -Math.PI / 2
     );
-
-    this.world.add(groundBody);
-    var sphere_ground = new CANNON.ContactMaterial(ground_cm, sphere_cm, {
-      //  定义两个刚体相遇后会发生什么
-      friction: 1, // 摩擦系数
-      restitution: 0.4 // 恢复系数
-    });
-    this.world.addContactMaterial(sphere_ground); // 添加到世界中
-
     // 平面网格
-    var groundGeometry = new THREE.PlaneGeometry(1000, 1000, 32);
+    var groundGeometry = new THREE.PlaneGeometry(2000, 2000, 32);
     var groundMaterial = new THREE.MeshStandardMaterial({
       color: 0x7f7f7f,
       side: THREE.DoubleSide //这个属性只知道是两面，具体的不清楚，哪位知道可以留言告知，谢谢
     });
     var ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2; // 跟随 前面的物理平面角度
-    this.scene.add(ground);
-
-    // 球网格
-    var sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
-    var sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-    var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    this.scene.add(sphere);
-    this.sphereBody = sphereBody;
-    this.sphere = sphere;
+    let terrain = this.Bodym.create("shape",{entity:ground,soul:groundBody,material:ground_cm});
+    ball.contact(terrain, { //  定义两个刚体相遇后会发生什么
+      friction: 1, // 摩擦系数
+      restitution: 0.4 // 恢复系数
+    });
   }
 }
 

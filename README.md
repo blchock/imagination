@@ -6,7 +6,6 @@ cnpm i imports-loader exports-loader --save-dev
 cnpm i three --save-dev
 cnpm install three-orbitcontrols
 
-
 性能监视器Stats
 cnpm install stats.js
 动画引擎Tween.js
@@ -40,10 +39,10 @@ npm test
 
 ```
 
----
-
-This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue)@[8fae476](https://github.com/SimulatedGREG/electron-vue/tree/8fae4763e9d225d3691b627e83b9e09b56f6c935) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).
-
 ### 弃用库
 FBX 模型 (弃用，支持特性太少 没有fbx符合)
 cnpm i --save three-fbx-loader
+
+---
+
+This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue)@[8fae476](https://github.com/SimulatedGREG/electron-vue/tree/8fae4763e9d225d3691b627e83b9e09b56f6c935) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).

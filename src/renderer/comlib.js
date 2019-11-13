@@ -1,10 +1,15 @@
-import Vue from 'vue';
+var uuid = require('node-uuid');
 //
 "use strict";
 
 let Com = {}
 
-Vue.prototype.Com = Com;
+window.Com = Com;
+
+Com.genID = (isTime) => {
+  if(isTime) return uuid.v1(); // time-based
+  else return uuid.v4(); // random
+}
 
 export default Com;
 

@@ -18,6 +18,9 @@
         <el-button v-show="isEditing" size="mini" @click="onDeleteBtn">删除角色</el-button>
       </li>
       <li>
+        <el-button v-show="isEditing" size="mini" @click="onHelperBtn">参考网格</el-button>
+      </li>
+      <li>
         <el-button size="mini" @click="onQuitBtn">退出系统</el-button>
       </li>
     </ul>
@@ -123,6 +126,9 @@ export default {
           type: "warning"
         });
       }
+    },
+    onHelperBtn() {
+      sc.helper.visible = !sc.helper.visible;
     }
   },
   mounted() {},

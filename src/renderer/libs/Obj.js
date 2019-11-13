@@ -57,9 +57,39 @@ class Obj extends Body {
   }
   remove() {
     if(this.entity) sc.scene.remove(this.entity);
-    // if(this.soul) sc.scene.remove(this.soul);
+    if(this.soul) sc.world.remove(this.soul);
     if(this.helper) sc.scene.remove(this.helper);
   }
 }
 
 export default Obj
+
+// loadPhysicObject(obj, id) {
+//   // 通过选中模型模块 查找顶层模型
+//   let self = this;
+//   if (obj.children.length > 0) {
+//     for (const i in obj.children) {
+//       self.loadPhysicObject(obj.children[i], i);
+//     }
+//   }
+//   if (obj.material && obj.geometry) {
+//     let material = Physijs.createMaterial(obj.material, 1, 0);
+//     let mesh = new Physijs.BoxMesh(obj.geometry, material, 0);
+//     mesh.castShadow = true;
+//     mesh.receiveShadow = true;
+//     self.scene.add(mesh);
+//     obj.parent.children[id] = mesh;
+//   }
+// },
+// initObject(mesh) {
+//   this.loadPhysicObject(mesh, 0);
+//   return mesh;
+//   // obj.addEventListener("collision", function(
+//   //   other_object,
+//   //   relative_velocity,
+//   //   relative_rotation,
+//   //   contact_normal
+//   // ) {
+//   //   // this是当前监听的模型，other_object是与之碰撞的对象，relative_velocity是两个模型之间的速度力差，relative_rotation是两个模型旋转之间的差
+//   // });
+// },

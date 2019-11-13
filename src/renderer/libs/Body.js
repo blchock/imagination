@@ -19,10 +19,17 @@ class Body { //  extends Body
     // 析构函数 override
   }
   setPo(x,y,z) {
-    if(this.obj && this.obj.position) this.obj.position.set(x,y,z);
+    if(this.entity && this.entity.position) this.entity.position.set(x,y,z);
   }
   setScale(x,y,z) {
-    if(this.obj && this.obj.scale) this.obj.scale.set(x,y,z);
+    if(this.entity && this.entity.scale) this.entity.scale.set(x,y,z);
+  }
+  linkage() { // 联动:身体跟上灵魂的步伐
+    if(this.entity && this.soul) {
+      if(this.entity.position && this.soul.position) this.entity.position.copy(this.soul.position);
+      if(this.entity.quaternion && this.soul.quaternion) this.entity.quaternion.copy(this.soul.quaternion);
+      if(this.entity.scale && this.soul.scale) this.entity.scale.copy(this.soul.scale);
+    }
   }
 }
 
