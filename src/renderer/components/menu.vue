@@ -90,7 +90,7 @@ export default {
               sc.showLoading(false)
               return;
             }
-            sc.Bodym.create(outDir, obj => {
+            sc.Bodym.create("obj", outDir, obj => {
               // obj.position.set(0, 10, 0);
               // obj.scale.set(30, 30, 30);
             });
@@ -99,9 +99,8 @@ export default {
           let outDir = path
             .relative(sc.rootPath, file)
             .replace(/\\/g, "/");
-          sc.Bodym.create(outDir, obj => {
-            obj.position.set(0, 0, 0);
-            // obj.scale.set(30, 30, 30);
+          sc.Bodym.create("obj", outDir, obj => {
+            obj.setPo(0,0,0);
           });
         }
       }
@@ -116,8 +115,7 @@ export default {
             type: "warning"
           })
           .then(() => {
-            console.log(sc.pickObject.uuid,sc.pickObject)
-            sc.Bodym.remove(sc.pickObject.uuid);
+            sc.Bodym.remove(sc.pickObject.id);
           });
       } else {
         self.$message({

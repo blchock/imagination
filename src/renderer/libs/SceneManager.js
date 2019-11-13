@@ -153,11 +153,11 @@ class SceneManager { //  extends Base
       // console.log("mouse:",mouse)
       // console.log(event.clientX,event.clientY)
       raycaster.setFromCamera(mouse, self.camera);
-      var intersects = raycaster.intersectObjects(self.Bodym.getBodys(), true);
+      var intersects = raycaster.intersectObjects(self.Bodym.getEntitys(), true);
       // console.log("intersects:",intersects)
       if (intersects.length > 0) {
         sc.pickObject = self.Bodym.getParent(intersects[0].object);
-        console.log("pick:", sc.pickObject.uuid);
+        console.log("pick:", sc.pickObject.id);
       }
     } else if (event.button === 2) {
       sc.pickObject = undefined;
@@ -259,46 +259,3 @@ class SceneManager { //  extends Base
 }
 
 export default SceneManager
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // loadPhysicObject(obj, id) {
-    //   // 通过选中模型模块 查找顶层模型
-    //   let self = this;
-    //   if (obj.children.length > 0) {
-    //     for (const i in obj.children) {
-    //       self.loadPhysicObject(obj.children[i], i);
-    //     }
-    //   }
-    //   if (obj.material && obj.geometry) {
-    //     let material = Physijs.createMaterial(obj.material, 1, 0);
-    //     let mesh = new Physijs.BoxMesh(obj.geometry, material, 0);
-    //     mesh.castShadow = true;
-    //     mesh.receiveShadow = true;
-    //     self.scene.add(mesh);
-    //     obj.parent.children[id] = mesh;
-    //   }
-    // },
-    // initObject(mesh) {
-    //   this.loadPhysicObject(mesh, 0);
-    //   return mesh;
-    //   // obj.addEventListener("collision", function(
-    //   //   other_object,
-    //   //   relative_velocity,
-    //   //   relative_rotation,
-    //   //   contact_normal
-    //   // ) {
-    //   //   // this是当前监听的模型，other_object是与之碰撞的对象，relative_velocity是两个模型之间的速度力差，relative_rotation是两个模型旋转之间的差
-    //   // });
-    // },
