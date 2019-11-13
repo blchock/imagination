@@ -136,6 +136,21 @@ class SceneManager { //  extends Base
       }
     }
   }
+  checkPick(intersects, i) { // 获取鼠标选中的第一个有效物体
+    if (intersects.length > 0 && i < intersects.length) {
+      let picked = sc.Bodym.getParent(intersects[i].object);
+      if(picked) {
+        if (picked.lockPick) {
+          sc.checkPick(intersects, i + 1);
+          return
+        }
+        sc.pickObject = picked;
+        console.log("pick:", sc.pickObject.id);
+      } else {
+        console.log("ERROR! you picked a unknow body:",intersects[0]);
+      }
+    }
+  }
   /**
    * 射线拾取函数
    * 选中的网格模型变为半透明效果
@@ -153,16 +168,7 @@ class SceneManager { //  extends Base
       // console.log(event.clientX,event.clientY)
       raycaster.setFromCamera(mouse, self.camera);
       var intersects = raycaster.intersectObjects(self.Bodym.getEntitys(), true);
-      // console.log("intersects:",intersects)
-      if (intersects.length > 0) {
-        let picked = self.Bodym.getParent(intersects[0].object);
-        if(picked) {
-          sc.pickObject = picked;
-          console.log("pick:", sc.pickObject.id);
-        } else {
-          console.log("ERROR! you picked a unknow body:",intersects[0]);
-        }
-      }
+      self.checkPick(intersects, 0);
     } else if (event.button === 2) {
       sc.pickObject = undefined;
       // console.log("clear pick");
@@ -247,6 +253,7 @@ class SceneManager { //  extends Base
       friction: 1, // 摩擦系数
       restitution: 0.4 // 恢复系数
     });
+    terrain.lockPick = true // 让地形无法选中
   }
 }
 

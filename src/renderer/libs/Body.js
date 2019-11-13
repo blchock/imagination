@@ -7,7 +7,7 @@
  */
 class Body { //  extends Body
   constructor() {
-
+    this.lockPick = false // 是否能选中该物体
   }
   init() {
     // 初始化物体 override
@@ -18,10 +18,13 @@ class Body { //  extends Body
   remove() {
     // 析构函数 override
   }
-  setPo(x,y,z) {
+  setVisible(visible) { // 设置可见
+    if(this.entity) this.entity.visible = visible;
+  }
+  setPo(x,y,z) { // 设置位置
     if(this.entity && this.entity.position) this.entity.position.set(x,y,z);
   }
-  setScale(x,y,z) {
+  setScale(x,y,z) { // 设置缩放
     if(this.entity && this.entity.scale) this.entity.scale.set(x,y,z);
   }
   linkage() { // 联动:身体跟上灵魂的步伐
