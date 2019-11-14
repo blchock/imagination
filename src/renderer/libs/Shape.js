@@ -25,11 +25,6 @@ class Shape extends Body {
     sc.world.add(this.soul);
     return this.soul;
   }
-  contact(one, option) {
-    var con = new CANNON.ContactMaterial(this.material, one.material, option);
-    this.contacts.push(con);
-    sc.world.addContactMaterial(con);
-  }
   remove() {
     if(this.entity) sc.scene.remove(this.entity);
     if(this.soul) sc.world.remove(this.soul);

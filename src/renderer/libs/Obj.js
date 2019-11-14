@@ -15,6 +15,8 @@ class Obj extends Body {
     this.entity = null // 物体实体（包含网格，材质，贴图，节点集合）
     this.soul = null // 物体刚体
     this.helper = null // 物体包围盒
+    this.material = null // 刚体材质
+    this.contacts = [] // 联系集合
   }
   init(func) {
     if (sc.loading) return;
@@ -49,7 +51,33 @@ class Obj extends Body {
     var helper = new THREE.Box3Helper(box, 0xffff00); // 显示网格
     sc.scene.add(helper); // updateMatrixWorld
     this.helper = helper;
-    return helper;
+    let po = this.entity.position;
+    console.log("box:",box)
+    // soul
+    
+    // shape = new CANNON.Box(box.max);
+    // mass = 1;
+    // body = new CANNON.Body({
+    //   mass: 1
+    // });
+    // body.addShape(shape);
+    // body.angularVelocity.set(0,10,0);
+    // body.angularDamping = 0.5;
+    // world.addBody(body);
+    let boxsize = new CANNON.Vec3(box.max.x / 2, box.max.y / 2, box.max.z / 2)
+    console.log("CANNON box:",boxsize)
+    var soulShape = new CANNON.Box(boxsize); // 形状
+    this.material = new CANNON.Material(); // 材质
+    this.soul = new CANNON.Body({
+      mass: 1, //质量
+      position: new CANNON.Vec3(po.x, po.y, po.z), // 位置
+      shape: soulShape,
+      material: this.material
+    });
+    this.soul.angularVelocity.set(0,10,0);
+    this.soul.angularDamping = 0.5;
+    sc.world.add(this.soul);
+    return this.soul;
     // var length = box.max.x - box.min.x;
     // var width = box.max.z - box.min.z;
     // var height = box.max.y - box.min.y;
@@ -59,6 +87,12 @@ class Obj extends Body {
     if(this.entity) sc.scene.remove(this.entity);
     if(this.soul) sc.world.remove(this.soul);
     if(this.helper) sc.scene.remove(this.helper);
+    if(this.contacts.length > 0) {
+      this.contacts.forEach(con => {
+        sc.world.remove(con);
+      });
+    }
+    this.contacts = []
   }
 }
 

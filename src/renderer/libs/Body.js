@@ -34,6 +34,11 @@ class Body { //  extends Body
       if(this.entity.scale && this.soul.scale) this.entity.scale.copy(this.soul.scale);
     }
   }
+  contact(one, option) { // 关联材质摩擦
+    var con = new CANNON.ContactMaterial(this.material, one.material, option);
+    this.contacts.push(con);
+    sc.world.addContactMaterial(con);
+  }
 }
 
 export default Body

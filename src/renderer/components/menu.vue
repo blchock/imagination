@@ -94,8 +94,11 @@ export default {
               return;
             }
             sc.Bodym.create("obj", outDir, obj => {
-              // obj.position.set(0, 10, 0);
-              // obj.scale.set(30, 30, 30);
+              obj.setPo(0,2,0);
+              obj.contact(sc.terrain, { //  定义两个刚体相遇后会发生什么
+                friction: 1, // 摩擦系数
+                restitution: 0.4 // 恢复系数
+              });
             });
           });
         } else {
@@ -103,7 +106,11 @@ export default {
             .relative(sc.rootPath, file)
             .replace(/\\/g, "/");
           sc.Bodym.create("obj", outDir, obj => {
-            obj.setPo(0,0,0);
+            obj.setPo(0,2,0);
+            obj.contact(sc.terrain, { //  定义两个刚体相遇后会发生什么
+              friction: 1, // 摩擦系数
+              restitution: 0.4 // 恢复系数
+            });
           });
         }
       }

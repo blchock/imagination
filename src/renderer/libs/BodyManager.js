@@ -12,6 +12,7 @@ class BodyManager {
     this.bodys = [] // 物体集合
     this.entitys = [] // 实体集合（物体实际的本体）
     this.souls = [] // 刚体集合
+    this.materials = [] // 材质集合
   }
   getBodys = () => this.bodys;
   getEntitys = () => this.entitys;
@@ -28,9 +29,16 @@ class BodyManager {
     }
     body.init(entity => {
       let soul = body.initPhysic();
+      self.bodys.forEach(mat => {
+        body.contact(mat,{ //  定义两个刚体相遇后会发生什么
+          friction: 1, // 摩擦系数
+          restitution: 0.4 // 恢复系数
+        });
+      });
       self.bodys.push(body);
       self.entitys.push(entity);
       self.souls.push(soul);
+      self.materials.push(body.material);
       if (func) func(body);
     });
     return body
@@ -43,6 +51,7 @@ class BodyManager {
         self.bodys.splice(i, 1);
         self.entitys.splice(i, 1);
         self.souls.splice(i, 1);
+        self.materials.splice(i, 1);
         console.log("delete:", id);
       }
     }

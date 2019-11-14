@@ -81,8 +81,10 @@ class SceneManager { //  extends Base
   }
   initPhysic() {
     let world = new CANNON.World();
-    world.gravity.set(0, -9.82, 0);
-    world.broadphase = new CANNON.NaiveBroadphase(); // Broadphase
+    // world.gravity.set(0, -9.82, 0);
+    world.gravity.set(0,-10,0);
+    world.broadphase = new CANNON.NaiveBroadphase();
+    world.solver.iterations = 10;
     this.world = world;
   }
   initLight() {
@@ -213,20 +215,20 @@ class SceneManager { //  extends Base
     this.oc = controls;
   }
   initObject() {
-    //创建球形刚体
-    var sphereShape = new CANNON.Sphere(1); // 形状
-    var sphere_cm = new CANNON.Material(); // 材质
-    var sphereBody = new CANNON.Body({
-      mass: 5, //质量
-      position: new CANNON.Vec3(0, 10, 0), // 位置
-      shape: sphereShape,
-      material: sphere_cm
-    });
-    // 球网格
-    var sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
-    var sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-    var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    let ball = this.Bodym.create("shape",{entity:sphere,soul:sphereBody,material:sphere_cm});
+    // //创建球形刚体
+    // var sphereShape = new CANNON.Sphere(1); // 形状
+    // var sphere_cm = new CANNON.Material(); // 材质
+    // var sphereBody = new CANNON.Body({
+    //   mass: 5, //质量
+    //   position: new CANNON.Vec3(0, 10, 0), // 位置
+    //   shape: sphereShape,
+    //   material: sphere_cm
+    // });
+    // // 球网格
+    // var sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+    // var sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+    // var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    // let ball = this.Bodym.create("shape",{entity:sphere,soul:sphereBody,material:sphere_cm});
     // 平面
     var groundShape = new CANNON.Plane(); // 形状
     var ground_cm = new CANNON.Material(); // 材质
@@ -249,10 +251,7 @@ class SceneManager { //  extends Base
     var ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2; // 跟随 前面的物理平面角度
     let terrain = this.Bodym.create("shape",{entity:ground,soul:groundBody,material:ground_cm});
-    ball.contact(terrain, { //  定义两个刚体相遇后会发生什么
-      friction: 1, // 摩擦系数
-      restitution: 0.4 // 恢复系数
-    });
+    this.terrain = terrain;
     terrain.lockPick = true // 让地形无法选中
   }
 }
