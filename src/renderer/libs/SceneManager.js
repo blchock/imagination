@@ -32,6 +32,8 @@ class SceneManager { //  extends Base
     this.size = null
     this.loading = null
     this.pickObject = null // 选中的物体
+    this.pickData = null // 选中的点数据（包含point坐标，distance离摄像机距离，face朝向，uv矩阵，object对象mesh等）
+    this.pickDataDirect = null // 选中的点（跳过锁定物体）
     this.rootPath = path.normalize(process.execPath.slice(0,process.execPath.lastIndexOf("node_modules"))); // 主目录
     this.initEngine();
     this.initCamera();
@@ -146,6 +148,8 @@ class SceneManager { //  extends Base
           sc.checkPick(intersects, i + 1);
           return
         }
+        sc.pickDataDirect = intersects[i] // 选中的点（跳过锁定物体）
+        // console.log("pickDataDirect:",sc.pickDataDirect)
         sc.pickObject = picked;
         console.log("pick:", sc.pickObject.id);
       } else {
@@ -170,6 +174,8 @@ class SceneManager { //  extends Base
       // console.log(event.clientX,event.clientY)
       raycaster.setFromCamera(mouse, self.camera);
       var intersects = raycaster.intersectObjects(self.Bodym.getEntitys(), true);
+      self.pickData = intersects[0] // 选中的点
+      // console.log("pickData:",self.pickData)
       self.checkPick(intersects, 0);
     } else if (event.button === 2) {
       sc.pickObject = undefined;
